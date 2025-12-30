@@ -8,6 +8,7 @@
     <string name="feed_placeholder">Здесь будет отображаться новостная лента</string>
     <string name="profile_title">Профиль пользователя</string>
     <string name="profile_name">Имя пользователя</string>
+    <string name="profile_status">Статус</string>
     <string name="profile_email">user@example.com</string>
     <string name="profile_phone">+7 (999) 123-45-67</string>
     <string name="settings_title">Настройки</string>

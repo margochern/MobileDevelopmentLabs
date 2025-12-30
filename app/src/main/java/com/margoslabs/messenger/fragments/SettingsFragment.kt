@@ -1,6 +1,5 @@
 package com.margoslabs.messenger.fragments
 
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -8,20 +7,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import com.margoslabs.messenger.databinding.FragmentSettingsBinding
+import com.margoslabs.messenger.viewmodel.SettingsViewModel
 
 class SettingsFragment : Fragment() {
     
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private val TAG = "SettingsFragment"
-    private lateinit var sharedPreferences: SharedPreferences
+    
+    // Получаем ViewModel через делегат viewModels()
+    private val viewModel: SettingsViewModel by viewModels()
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(TAG, "onCreate: Fragment создается")
-        
-        sharedPreferences = requireContext().getSharedPreferences("app_settings", android.content.Context.MODE_PRIVATE)
     }
     
     override fun onCreateView(
@@ -38,22 +39,45 @@ class SettingsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: Представление Fragment создано")
         
+        setupObservers()
         setupThemeSwitch()
     }
     
+    /**
+     * Настройка наблюдателей LiveData для реактивного обновления UI
+     */
+    private fun setupObservers() {
+        // Наблюдаем за изменениями темы
+        viewModel.isDarkTheme.observe(viewLifecycleOwner) { isDark ->
+            Log.d(TAG, "isDarkTheme observer: Получена новая тема - темная: $isDark")
+            // Обновляем переключатель только если значение изменилось
+            if (binding.switchTheme.isChecked != isDark) {
+                binding.switchTheme.isChecked = isDark
+            }
+            // Применяем тему
+            applyTheme(isDark)
+        }
+    }
+    
+    /**
+     * Настройка переключателя темы
+     */
     private fun setupThemeSwitch() {
-        val isDarkTheme = sharedPreferences.getBoolean("dark_theme", false)
-        binding.switchTheme.isChecked = isDarkTheme
-        
         binding.switchTheme.setOnCheckedChangeListener { _, isChecked ->
             Log.d(TAG, "Переключатель темы изменен: $isChecked")
-            sharedPreferences.edit().putBoolean("dark_theme", isChecked).apply()
-            
-            if (isChecked) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
+            // Обновляем ViewModel
+            viewModel.setDarkTheme(isChecked)
+        }
+    }
+    
+    /**
+     * Применить тему приложения
+     */
+    private fun applyTheme(isDark: Boolean) {
+        if (isDark) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         }
     }
     

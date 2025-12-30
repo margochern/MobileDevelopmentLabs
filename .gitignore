@@ -95,8 +95,3 @@ lint/tmp/
 .env.local
 .env.*.local
 
-# APK files (but we'll add the release APK manually for submission)
-*.apk
-!app/release/app-release.apk
-!app-release.apk
-
