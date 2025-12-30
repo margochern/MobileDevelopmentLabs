@@ -1,5 +1,7 @@
 package com.margoslabs.messenger.fragments
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,8 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.margoslabs.messenger.data.preferences.AvatarType
 import com.margoslabs.messenger.databinding.FragmentProfileBinding
+import com.margoslabs.messenger.ui.adapter.AvatarAdapter
 import com.margoslabs.messenger.viewmodel.ProfileViewModel
+import kotlinx.coroutines.launch
 
 class ProfileFragment : Fragment() {
     
@@ -19,7 +28,10 @@ class ProfileFragment : Fragment() {
     private val TAG = "ProfileFragment"
     
     // Получаем ViewModel через делегат viewModels()
-    private val viewModel: ProfileViewModel by viewModels()
+    private val viewModel: ProfileViewModel by viewModels {
+        androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+    }
+    private lateinit var avatarAdapter: AvatarAdapter
     
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,8 +52,36 @@ class ProfileFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         Log.d(TAG, "onViewCreated: Представление Fragment создано")
         
+        setupRecyclerView()
         setupObservers()
         setupEditTextListeners()
+        setupAvatarSelection()
+        
+        // Инициализируем отображение аватара
+        viewModel.selectedAvatar.value?.let { avatarType ->
+            updateAvatarDisplay(avatarType)
+            avatarAdapter.setSelectedAvatar(avatarType)
+        }
+    }
+    
+    private fun setupRecyclerView() {
+        avatarAdapter = AvatarAdapter { avatarType ->
+            viewModel.updateAvatar(avatarType)
+        }
+        binding.recyclerViewAvatars.apply {
+            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+            adapter = avatarAdapter
+        }
+        // Устанавливаем список доступных аватаров
+        avatarAdapter.submitList(AvatarType.getAllTypes())
+    }
+    
+    private fun setupAvatarSelection() {
+        binding.btnSelectAvatar.setOnClickListener {
+            // Переключаем видимость RecyclerView с аватарами
+            val isVisible = binding.recyclerViewAvatars.visibility == View.VISIBLE
+            binding.recyclerViewAvatars.visibility = if (isVisible) View.GONE else View.VISIBLE
+        }
     }
     
     /**
@@ -65,6 +105,21 @@ class ProfileFragment : Fragment() {
                 binding.etStatus.setText(status)
             }
         }
+        
+        // Наблюдаем за изменениями аватара
+        viewModel.selectedAvatar.observe(viewLifecycleOwner) { avatarType ->
+            Log.d(TAG, "selectedAvatar observer: Получен новый аватар - '${avatarType.displayName}'")
+            updateAvatarDisplay(avatarType)
+            avatarAdapter.setSelectedAvatar(avatarType)
+        }
+    }
+    
+    private fun updateAvatarDisplay(avatarType: AvatarType) {
+        val drawable = GradientDrawable().apply {
+            shape = GradientDrawable.OVAL
+            setColor(Color.parseColor(avatarType.colorHex))
+        }
+        binding.ivProfileAvatar.background = drawable
     }
     
     /**

@@ -14,5 +14,7 @@
     <string name="settings_title">Настройки</string>
     <string name="settings_theme">Темная тема</string>
     <string name="settings_theme_description">Включить темную тему приложения</string>
+    <string name="refresh_messages">Обновить сообщения</string>
+    <string name="avatar_description">Аватар пользователя</string>
 </resources>
 
