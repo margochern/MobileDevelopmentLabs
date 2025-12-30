@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Мессенджер</string>
+    <string name="nav_feed">Лента</string>
+    <string name="nav_profile">Профиль</string>
+    <string name="nav_settings">Настройки</string>
+    <string name="feed_title">Новостная лента</string>
+    <string name="feed_placeholder">Здесь будет отображаться новостная лента</string>
+    <string name="profile_title">Профиль пользователя</string>
+    <string name="profile_name">Имя пользователя</string>
+    <string name="profile_status">Статус</string>
+    <string name="profile_email">user@example.com</string>
+    <string name="profile_phone">+7 (999) 123-45-67</string>
+    <string name="settings_title">Настройки</string>
+    <string name="settings_theme">Темная тема</string>
+    <string name="settings_theme_description">Включить темную тему приложения</string>
+</resources>
+
